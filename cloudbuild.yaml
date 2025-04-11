@@ -7,10 +7,9 @@ steps:
       - |
         set -e
         
-        gcloud storage cp gs://bkt-churn-dev-mlops-dap/pipeline_docker_base_image/* .
         docker build --no-cache -t pipeline_image . -f Dockerfile
-        docker tag pipeline_image asia-southeast2-docker.pkg.dev/prj-273fa85c8fac49df/mlops-pipeline-base-image/pipeline-image:latest
-        docker push asia-southeast2-docker.pkg.dev/prj-273fa85c8fac49df/mlops-pipeline-base-image/pipeline-image:latest
+        docker tag pipeline_image asia-southeast2-docker.pkg.dev/bdi-onprem/test-proxy-deletable/pipeline-image:latest
+        docker push asia-southeast2-docker.pkg.dev/bdi-onprem/test-proxy-deletable/pipeline-image:latest
  
   - id: Download Python Library
     name: 'python:3.10'
@@ -27,8 +26,8 @@ steps:
         fi
 
         no_proxy="169.254.169.254,metadata,metadata.google.internal,metadata.google.internal."
-        export http_proxy="http://v00029643:or@ngeb@nK012@10.194.138.100:8080/"
-        export https_proxy="http://v00029643:or@ngeb@nK012@10.194.138.100:8080/"
+        export http_proxy="http://172.20.80.32:3128/"
+        export https_proxy="http://172.20.80.32:3128/"
         
         while IFS= read -r library_name || [ -n "$$library_name" ]; do
             [ -z "$$library_name" ] && continue
@@ -45,14 +44,14 @@ steps:
         root_dir="list_library"
         
         no_proxy="169.254.169.254,metadata,metadata.google.internal,metadata.google.internal."
-        export http_proxy="http://10.194.138.100:8080/"
-        export https_proxy="http://10.194.138.100:8080/"
+        export http_proxy="http://172.20.80.32:3128/"
+        export https_proxy="http://172.20.80.32:3128/"
  
         pip install --upgrade twine packaging keyring keyrings.google-artifactregistry-auth
         
         for filename in "$$root_dir"/*; do
             python3 -m twine upload \
-                --repository-url "https://asia-southeast2-python.pkg.dev/prj-273fa85c8fac49df/mlops-pipeline-python-library" \
+                --repository-url "https://asia-southeast2-python.pkg.dev/bdi-onprem/python-library-test" \
                 --skip-existing \
                 "$filename" \
                 --verbose
@@ -60,5 +59,5 @@ steps:
 
 options:
   pool:
-    name: 'projects/783085209861/locations/asia-southeast2/workerPools/worker'
+    name: 'projects/794055541149/locations/asia-southeast2/workerPools/Test-1'
   logging: CLOUD_LOGGING_ONLY
