@@ -1,0 +1,64 @@
+steps:  
+  - id: "Preparation File, Build Docker, Push Docker"
+    name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+    entrypoint: bash
+    args:
+      - '-c'
+      - |
+        set -e
+        
+        gcloud storage cp gs://bkt-churn-dev-mlops-dap/pipeline_docker_base_image/* .
+        docker build --no-cache -t pipeline_image . -f Dockerfile
+        docker tag pipeline_image asia-southeast2-docker.pkg.dev/prj-273fa85c8fac49df/mlops-pipeline-base-image/pipeline-image:latest
+        docker push asia-southeast2-docker.pkg.dev/prj-273fa85c8fac49df/mlops-pipeline-base-image/pipeline-image:latest
+ 
+  - id: Download Python Library
+    name: 'python:3.10'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        set -e
+
+        root_dir="list_library"
+        
+        if [ ! -d "$$root_dir" ]; then
+            mkdir "$$root_dir"
+        fi
+
+        no_proxy="169.254.169.254,metadata,metadata.google.internal,metadata.google.internal."
+        export http_proxy="http://v00029643:or@ngeb@nK012@10.194.138.100:8080/"
+        export https_proxy="http://v00029643:or@ngeb@nK012@10.194.138.100:8080/"
+        
+        while IFS= read -r library_name || [ -n "$$library_name" ]; do
+            [ -z "$$library_name" ] && continue
+            pip download "$$library_name" -d "$$root_dir"
+
+        done < list_library.txt
+
+  - id: Upload Python Library
+    name: 'python:3.10'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        root_dir="list_library"
+        
+        no_proxy="169.254.169.254,metadata,metadata.google.internal,metadata.google.internal."
+        export http_proxy="http://10.194.138.100:8080/"
+        export https_proxy="http://10.194.138.100:8080/"
+ 
+        pip install --upgrade twine packaging keyring keyrings.google-artifactregistry-auth
+        
+        for filename in "$$root_dir"/*; do
+            python3 -m twine upload \
+                --repository-url "https://asia-southeast2-python.pkg.dev/prj-273fa85c8fac49df/mlops-pipeline-python-library" \
+                --skip-existing \
+                "$filename" \
+                --verbose
+        done
+
+options:
+  pool:
+    name: 'projects/783085209861/locations/asia-southeast2/workerPools/worker'
+  logging: CLOUD_LOGGING_ONLY
