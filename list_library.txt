@@ -36,3 +36,4 @@ urllib3==1.26.20
 fastapi==0.114.0
 uvicorn==0.17.6
 joblib~=1.0
+exceptiongroup==1.2.2
