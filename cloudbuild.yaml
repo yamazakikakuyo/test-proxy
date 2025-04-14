@@ -61,6 +61,10 @@ steps:
         export https_proxy="http://172.20.80.32:3128/"
  
         pip install --upgrade twine packaging keyring keyrings.google-artifactregistry-auth
+
+        unset http_proxy 
+        unset https_proxy 
+        unset no_proxy
         
         for filename in "$$root_dir"/*; do
             python3 -m twine upload \
