@@ -1,4 +1,17 @@
 steps:
+  - id: "Clone GitHub"
+    name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+    entrypoint: bash
+    args:
+      - '-c'
+      - |
+        set -e
+
+        git config --global http.proxy http://172.20.80.32:3128/
+        git config --global https.proxy http://172.20.80.32:3128/
+        git clone https://github.com/yamazakikakuyo/test-proxy.git
+        ls
+  
   - id: "Preparation File, Build Docker, Push Docker"
     name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     entrypoint: bash
