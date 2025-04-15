@@ -1,0 +1,30 @@
+steps:
+  - id: "Clone GitHub"
+    name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+    entrypoint: bash
+    args:
+      - '-c'
+      - |
+        set -e
+
+        git config --global http.proxy http://172.20.80.32:3128/
+        git config --global https.proxy http://172.20.80.32:3128/
+        git clone https://github.com/yamazakikakuyo/test-proxy.git
+        mv test-proxy/* .
+  
+  - id: "Preparation File, Build Docker, Push Docker"
+    name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+    entrypoint: bash
+    args:
+      - '-c'
+      - |
+        set -e
+        
+        docker build --no-cache -t pipeline_image . -f Dockerfile_2
+        docker tag pipeline_image asia-southeast2-docker.pkg.dev/bdi-onprem/test-proxy-deletable-2/pipeline-image:latest
+        docker push asia-southeast2-docker.pkg.dev/bdi-onprem/test-proxy-deletable-2/pipeline-image:latest
+        
+options:
+  pool:
+    name: 'projects/794055541149/locations/asia-southeast2/workerPools/Test-1'
+  logging: CLOUD_LOGGING_ONLY
