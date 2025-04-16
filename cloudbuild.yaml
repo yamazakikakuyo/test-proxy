@@ -20,7 +20,7 @@ steps:
       - |
         set -e
         SECRET_PROXY=$(gcloud secrets versions access latest --secret=test-proxy)
-        docker build --no-cache --build-arg MY_SECRET="$$SECRET_PROXY" -t pipeline_image . -f Dockerfile
+        docker build --no-cache --build-arg SECRET_PROXY="$$SECRET_PROXY" -t pipeline_image . -f Dockerfile
         docker tag pipeline_image asia-southeast2-docker.pkg.dev/bdi-onprem/test-proxy-deletable/pipeline-image:latest
         docker push asia-southeast2-docker.pkg.dev/bdi-onprem/test-proxy-deletable/pipeline-image:latest
  
