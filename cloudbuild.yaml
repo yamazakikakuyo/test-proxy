@@ -7,8 +7,8 @@ steps:
       - |
         set -e
 
-        git config --global http.proxy $(gcloud secrets versions access latest --secret=test-proxy)
-        git config --global https.proxy $(gcloud secrets versions access latest --secret=test-proxy)
+        git config --global http.proxy $(gcloud secrets versions access latest --secret="test-proxy" --project="bdi-onprem")
+        git config --global https.proxy $(gcloud secrets versions access latest --secret="test-proxy" --project="bdi-onprem")
         git clone https://github.com/yamazakikakuyo/test-proxy.git
         mv test-proxy/* .
   
@@ -19,7 +19,7 @@ steps:
       - '-c'
       - |
         set -e
-        docker build --no-cache --build-arg SECRET_PROXY="$(gcloud secrets versions access latest --secret=test-proxy)" -t pipeline_image . -f Dockerfile
+        docker build --no-cache --build-arg SECRET_PROXY="$(gcloud secrets versions access latest --secret="test-proxy" --project="bdi-onprem")" -t pipeline_image . -f Dockerfile
         docker tag pipeline_image asia-southeast2-docker.pkg.dev/bdi-onprem/test-proxy-deletable/pipeline-image:latest
         docker push asia-southeast2-docker.pkg.dev/bdi-onprem/test-proxy-deletable/pipeline-image:latest
  
@@ -38,8 +38,8 @@ steps:
         fi
 
         no_proxy="169.254.169.254,metadata,metadata.google.internal,metadata.google.internal."
-        export http_proxy=$(gcloud secrets versions access latest --secret=test-proxy)
-        export https_proxy=$(gcloud secrets versions access latest --secret=test-proxy)
+        export http_proxy=$(gcloud secrets versions access latest --secret="test-proxy" --project="bdi-onprem")
+        export https_proxy=$(gcloud secrets versions access latest --secret="test-proxy" --project="bdi-onprem")
         
         while IFS= read -r library_name || [ -n "$$library_name" ]; do
             [ -z "$$library_name" ] && continue
@@ -56,8 +56,8 @@ steps:
         root_dir="list_library"
         
         no_proxy="169.254.169.254,metadata,metadata.google.internal,metadata.google.internal."
-        export http_proxy=$(gcloud secrets versions access latest --secret=test-proxy)
-        export https_proxy=$(gcloud secrets versions access latest --secret=test-proxy)
+        export http_proxy=$(gcloud secrets versions access latest --secret="test-proxy" --project="bdi-onprem")
+        export https_proxy=$(gcloud secrets versions access latest --secret="test-proxy" --project="bdi-onprem")
  
         pip install --upgrade twine packaging keyring keyrings.google-artifactregistry-auth
 
